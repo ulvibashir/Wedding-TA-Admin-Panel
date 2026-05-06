@@ -132,13 +132,14 @@ export default function AdminPanel() {
   }
 
   function handleExport() {
-    const rows = entries.map(e => ({
-      "First Name": e.firstName,
-      "Last Name": e.lastName,
-      "Status": e.attending ? "Attending" : "Declined",
-      "Additional Guests": e.guests.map(g => `${g.firstName} ${g.lastName}`).join("; "),
-      "Submitted At": formatDate((e as RsvpEntry & { submittedAt: unknown }).submittedAt),
-    }));
+    const rows: { "First Name": string; "Last Name": string }[] = [];
+    for (const e of entries) {
+      if (!e.attending) continue;
+      rows.push({ "First Name": e.firstName, "Last Name": e.lastName });
+      for (const g of e.guests) {
+        rows.push({ "First Name": g.firstName, "Last Name": g.lastName });
+      }
+    }
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Guests");
