@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   collection, onSnapshot, addDoc, updateDoc, deleteDoc,
-  doc, serverTimestamp, query, orderBy,
+  doc, serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Guest, RsvpEntry } from "@/types/rsvp";
@@ -39,16 +39,27 @@ export default function AdminPanel() {
   const [error, setError]           = useState("");
 
   useEffect(() => {
-    const q = query(collection(db, "rsvps"), orderBy("submittedAt", "desc"));
-    return onSnapshot(q, (snap) => {
-      setEntries(
-        snap.docs.map(d => ({
+    return onSnapshot(
+      collection(db, "rsvps"),
+      (snap) => {
+        const rows = snap.docs.map(d => ({
           ...(d.data() as Omit<RsvpEntry, "docId">),
           docId: d.id,
-        }))
-      );
-      setLoading(false);
-    });
+        }));
+        // sort newest first client-side to avoid needing a Firestore index
+        rows.sort((a, b) => {
+          const ta = (a as any).submittedAt?.toMillis?.() ?? 0;
+          const tb = (b as any).submittedAt?.toMillis?.() ?? 0;
+          return tb - ta;
+        });
+        setEntries(rows);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Firestore read error:", err);
+        setLoading(false);
+      }
+    );
   }, []);
 
   // Stats
