@@ -175,15 +175,21 @@ export default function AdminPanel() {
         {/* ── Stats ── */}
         <div className="adm-stats">
           <div className="adm-stat">
-            <span className="adm-stat-num blue">{entries.length}</span>
+            <span className={`adm-stat-num blue ${loading ? "adm-stat-skeleton" : ""}`}>
+              {loading ? "" : entries.length}
+            </span>
             <span className="adm-stat-label">Total Responses</span>
           </div>
           <div className="adm-stat">
-            <span className="adm-stat-num teal">{totalPeople}</span>
+            <span className={`adm-stat-num teal ${loading ? "adm-stat-skeleton" : ""}`}>
+              {loading ? "" : totalPeople}
+            </span>
             <span className="adm-stat-label">Total Attending</span>
           </div>
           <div className="adm-stat">
-            <span className="adm-stat-num muted">{declined}</span>
+            <span className={`adm-stat-num muted ${loading ? "adm-stat-skeleton" : ""}`}>
+              {loading ? "" : declined}
+            </span>
             <span className="adm-stat-label">Declined</span>
           </div>
         </div>
