@@ -15,7 +15,8 @@ function formatDate(ts: unknown): string {
   const d = (ts as FirestoreTimestamp).toDate
     ? (ts as FirestoreTimestamp).toDate()
     : new Date(ts as string);
-  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) +
+    " " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function AdminPanel() {
@@ -208,7 +209,9 @@ export default function AdminPanel() {
                       </span>
                     </td>
                     <td className="adm-hide-sm adm-guests-col">
-                      {entry.attending ? entry.guests.length : "—"}
+                      {!entry.attending || entry.guests.length === 0
+                        ? "—"
+                        : entry.guests.map(g => `${g.firstName} ${g.lastName}`).join(", ")}
                     </td>
                     <td className="adm-hide-sm adm-date-col">
                       {formatDate((entry as RsvpEntry & { submittedAt: unknown }).submittedAt)}
