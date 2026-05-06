@@ -161,6 +161,21 @@ body { background: var(--bg); font-family: 'Jost', sans-serif; color: var(--deep
   font-family: 'Cormorant Garamond', serif;
   font-size: 26px; font-weight: 300; color: var(--deep);
 }
+.adm-bar-actions {
+  display: flex; gap: 10px; align-items: center;
+}
+.adm-export-btn {
+  padding: 12px 28px; border: 1px solid var(--teal);
+  font-family: 'Jost', sans-serif; font-size: 10px;
+  letter-spacing: 0.4em; text-transform: uppercase;
+  font-weight: 300; cursor: pointer; transition: all 0.3s;
+  background: transparent; color: var(--teal);
+}
+.adm-export-btn:hover:not(:disabled) {
+  background: var(--teal); color: var(--white);
+  transform: translateY(-1px);
+}
+.adm-export-btn:disabled { opacity: 0.4; cursor: default; }
 .adm-add-btn {
   padding: 12px 28px; border: none;
   font-family: 'Jost', sans-serif; font-size: 10px;

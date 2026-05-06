@@ -130,6 +130,29 @@ export default function AdminPanel() {
     }
   }
 
+  function handleExport() {
+    const rows: string[][] = [["First Name", "Last Name", "Status", "Additional Guests", "Submitted At"]];
+    for (const e of entries) {
+      const guestNames = e.guests.map(g => `${g.firstName} ${g.lastName}`).join("; ");
+      const submittedAt = (e as RsvpEntry & { submittedAt: unknown }).submittedAt;
+      rows.push([
+        e.firstName,
+        e.lastName,
+        e.attending ? "Attending" : "Declined",
+        guestNames,
+        formatDate(submittedAt),
+      ]);
+    }
+    const csv = rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `guests-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function handleDelete() {
     if (!deleteTarget || deleting) return;
     setDeleting(true);
@@ -175,7 +198,10 @@ export default function AdminPanel() {
         {/* ── Action bar ── */}
         <div className="adm-bar">
           <h1 className="adm-bar-title">Guest List</h1>
-          <button className="adm-add-btn" onClick={openAdd}>+ Add RSVP</button>
+          <div className="adm-bar-actions">
+            <button className="adm-export-btn" onClick={handleExport} disabled={entries.length === 0}>Export CSV</button>
+            <button className="adm-add-btn" onClick={openAdd}>+ Add RSVP</button>
+          </div>
         </div>
 
         {/* ── Table ── */}
