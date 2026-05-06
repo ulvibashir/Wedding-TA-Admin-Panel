@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import * as XLSX from "xlsx";
 import {
   collection, onSnapshot, addDoc, updateDoc, deleteDoc,
   doc, serverTimestamp,
@@ -131,26 +132,17 @@ export default function AdminPanel() {
   }
 
   function handleExport() {
-    const rows: string[][] = [["First Name", "Last Name", "Status", "Additional Guests", "Submitted At"]];
-    for (const e of entries) {
-      const guestNames = e.guests.map(g => `${g.firstName} ${g.lastName}`).join("; ");
-      const submittedAt = (e as RsvpEntry & { submittedAt: unknown }).submittedAt;
-      rows.push([
-        e.firstName,
-        e.lastName,
-        e.attending ? "Attending" : "Declined",
-        guestNames,
-        formatDate(submittedAt),
-      ]);
-    }
-    const csv = rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `guests-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const rows = entries.map(e => ({
+      "First Name": e.firstName,
+      "Last Name": e.lastName,
+      "Status": e.attending ? "Attending" : "Declined",
+      "Additional Guests": e.guests.map(g => `${g.firstName} ${g.lastName}`).join("; "),
+      "Submitted At": formatDate((e as RsvpEntry & { submittedAt: unknown }).submittedAt),
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Guests");
+    XLSX.writeFile(wb, `guests-${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 
   async function handleDelete() {
@@ -199,7 +191,7 @@ export default function AdminPanel() {
         <div className="adm-bar">
           <h1 className="adm-bar-title">Guest List</h1>
           <div className="adm-bar-actions">
-            <button className="adm-export-btn" onClick={handleExport} disabled={entries.length === 0}>Export CSV</button>
+            <button className="adm-export-btn" onClick={handleExport} disabled={entries.length === 0}>Export Excel</button>
             <button className="adm-add-btn" onClick={openAdd}>+ Add RSVP</button>
           </div>
         </div>
