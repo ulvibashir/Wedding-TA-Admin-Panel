@@ -312,30 +312,63 @@ body { background: var(--bg); font-family: 'Jost', sans-serif; color: var(--deep
 /* ── Mobile ── */
 @media (max-width: 768px) {
   .adm-header { padding: 14px 20px; }
-  .adm-body { padding: 32px 16px; }
+  .adm-body { padding: 24px 16px; }
 
-  .adm-stats { gap: 10px; margin-bottom: 32px; }
-  .adm-stat { padding: 22px 14px; }
-  .adm-stat-num { font-size: 40px; }
-  .adm-stat-label { font-size: 8px; letter-spacing: 0.3em; }
+  /* Stats: 3 compact columns */
+  .adm-stats { gap: 8px; margin-bottom: 28px; }
+  .adm-stat { padding: 18px 10px; }
+  .adm-stat-num { font-size: 36px; }
+  .adm-stat-label { font-size: 7px; letter-spacing: 0.25em; margin-top: 6px; }
 
-  .adm-hide-sm { display: none; }
+  /* Action bar: stack vertically */
+  .adm-bar { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 16px; }
+  .adm-bar-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .adm-export-btn, .adm-add-btn { padding: 14px 8px; font-size: 9px; letter-spacing: 0.25em; }
 
+  /* Replace table with cards */
+  .adm-table-wrap { overflow: visible; }
+  .adm-table, .adm-table tbody, .adm-table tr { display: block; width: 100%; }
+  .adm-table thead { display: none; }
+  .adm-table td { display: flex; padding: 10px 16px; border-bottom: none; font-size: 13px; }
+  .adm-table tr {
+    background: var(--white); border: 1px solid var(--border);
+    margin-bottom: 10px; position: relative;
+  }
+  .adm-table tbody tr:last-child td { border-bottom: none; }
+  .adm-table tbody tr:hover td { background: transparent; }
+
+  /* Card layout: name + badge on top row, actions at bottom */
+  .adm-table td:nth-child(1) { /* Name */
+    font-size: 15px; font-weight: 400; padding: 14px 16px 6px;
+  }
+  .adm-table td:nth-child(2) { /* Status badge */
+    padding: 4px 16px 12px; border-bottom: 1px solid var(--border);
+  }
+  .adm-table td:nth-child(3), /* Guests - hidden */
+  .adm-table td:nth-child(4)  /* Date - hidden */
+  { display: none; }
+  .adm-table td:nth-child(5) { /* Actions */
+    padding: 12px 16px;
+  }
+  .adm-actions { justify-content: flex-start; gap: 10px; }
+  .adm-edit-btn, .adm-del-btn { padding: 10px 20px; font-size: 9px; flex: 1; text-align: center; }
+
+  /* Modal */
   .adm-modal { padding: 28px 20px; max-height: 95vh; }
-  .adm-confirm { padding: 32px 24px; }
-
-  .field-row { grid-template-columns: 1fr; }
+  .adm-confirm { padding: 32px 20px; }
+  .field-row { grid-template-columns: 1fr; gap: 0; }
   .attend-toggle { grid-template-columns: 1fr; }
-  .guest-entry { grid-template-columns: 1fr 1fr 32px; gap: 8px; }
-
-  .adm-table th,
-  .adm-table td { padding: 12px 14px; }
+  .attend-btn { padding: 16px 8px; }
+  .guest-entry { grid-template-columns: 1fr 1fr 36px; gap: 8px; }
+  .remove-guest { width: 36px; height: 36px; }
 }
 
-@media (max-width: 480px) {
-  .adm-stats { grid-template-columns: 1fr; }
+@media (max-width: 420px) {
   .adm-logo { font-size: 30px; }
   .adm-logo-sub { display: none; }
-  .guest-entry { grid-template-columns: 1fr; gap: 16px; }
-  .guest-entry .remove-guest { width: 100%; margin-bottom: 0; }
+  .adm-stats { grid-template-columns: repeat(3, 1fr); }
+  .adm-stat-num { font-size: 28px; }
+  .guest-entry { grid-template-columns: 1fr; gap: 12px; }
+  .remove-guest { width: 100%; height: 36px; }
+  .adm-bar-actions { grid-template-columns: 1fr; }
 }
