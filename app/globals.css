@@ -1,26 +1,326 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Great+Vibes&family=Jost:wght@200;300;400&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --blue:       #1e5fa8;
+  --blue-lt:    #4a8fd4;
+  --blue-pale:  #ddeaf8;
+  --green:      #1e7a4a;
+  --green-lt:   #4aaa74;
+  --green-pale: #d6eee2;
+  --teal:       #1a7070;
+  --teal-lt:    #2a9090;
+  --bg:         #f7f9f8;
+  --white:      #ffffff;
+  --deep:       #0f2a20;
+  --muted:      #2e4a3a;
+  --border:     #c4d4cc;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); font-family: 'Jost', sans-serif; color: var(--deep); }
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Shared form styles (mirrors the invitation site) ── */
+.field { margin-bottom: 24px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+
+.field-label {
+  font-size: 9px; letter-spacing: 0.45em; text-transform: uppercase;
+  font-weight: 300; color: var(--teal); display: block; margin-bottom: 10px;
+}
+.field-input {
+  width: 100%; background: transparent; border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 0; font-family: 'Jost', sans-serif;
+  font-size: 15px; font-weight: 300; color: var(--deep);
+  outline: none; transition: border-color 0.25s;
+}
+.field-input:focus { border-bottom-color: var(--teal); }
+.field-input::placeholder { color: #8aa898; }
+
+.attend-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.attend-btn {
+  padding: 14px 8px; border: 1px solid var(--border); background: transparent;
+  font-family: 'Jost', sans-serif; font-size: 10px;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  font-weight: 300; color: var(--deep); cursor: pointer; transition: all 0.25s;
+}
+.attend-btn.yes.active {
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  border-color: transparent; color: var(--white);
+}
+.attend-btn.no.active {
+  background: var(--deep); border-color: transparent; color: var(--white);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.guests-area {
+  margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);
+  animation: fadeUp 0.4s ease both;
+}
+.guests-top {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+}
+.guests-heading {
+  font-size: 9px; letter-spacing: 0.5em; text-transform: uppercase;
+  font-weight: 300; color: var(--teal);
+}
+.add-guest-btn {
+  font-family: 'Jost', sans-serif; font-size: 9px;
+  letter-spacing: 0.35em; text-transform: uppercase;
+  font-weight: 400; color: var(--teal);
+  background: none; border: none; cursor: pointer; padding: 6px 0; transition: color 0.2s;
+}
+.add-guest-btn:hover { color: var(--blue); }
+
+.guest-entry {
+  display: grid; grid-template-columns: 1fr 1fr 32px;
+  gap: 12px; align-items: end; margin-bottom: 20px;
+  animation: fadeUp 0.4s ease both;
+}
+.remove-guest {
+  width: 32px; height: 32px; border: 1px solid var(--muted);
+  background: none; color: var(--muted); cursor: pointer;
+  font-size: 16px; display: flex; align-items: center;
+  justify-content: center; transition: all 0.2s; margin-bottom: 1px; flex-shrink: 0;
+}
+.remove-guest:hover { border-color: #c0392b; color: #c0392b; background: #fdf0ef; }
+.guests-empty { font-size: 12px; font-weight: 300; color: var(--muted); font-style: italic; }
+
+.submit-btn {
+  width: 100%; padding: 18px; border: none; margin-top: 28px;
+  font-family: 'Jost', sans-serif; font-size: 10px;
+  letter-spacing: 0.5em; text-transform: uppercase;
+  font-weight: 300; cursor: pointer; transition: all 0.35s;
+  background: linear-gradient(90deg, var(--blue), var(--teal), var(--green));
+  color: var(--white);
+}
+.submit-btn:hover:not(:disabled) {
+  opacity: 0.85; transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(26,112,112,0.25);
+}
+.submit-btn:disabled { opacity: 0.25; cursor: not-allowed; transform: none; }
+.form-error { font-size: 11px; color: #c0392b; font-weight: 300; margin-top: 10px; }
+
+/* ── Admin page shell ── */
+.adm-page { min-height: 100vh; background: var(--bg); }
+
+/* Header */
+.adm-header {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 18px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+.adm-header-left { display: flex; align-items: baseline; gap: 16px; }
+.adm-logo {
+  font-family: 'Great Vibes', cursive; font-size: 38px; line-height: 1;
+  background: linear-gradient(90deg, var(--blue), var(--teal), var(--green));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.adm-logo-sub {
+  font-size: 9px; letter-spacing: 0.5em; text-transform: uppercase;
+  font-weight: 300; color: var(--muted);
+}
+
+/* Stats */
+.adm-body { max-width: 1020px; margin: 0 auto; padding: 48px 32px; }
+
+.adm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 48px; }
+.adm-stat {
+  background: var(--white); border: 1px solid var(--border);
+  padding: 32px 24px; text-align: center;
+}
+.adm-stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 58px; font-weight: 300; line-height: 1; display: block;
+}
+.adm-stat-num.blue  { color: var(--blue); }
+.adm-stat-num.teal  { color: var(--teal); }
+.adm-stat-num.muted { color: var(--muted); }
+.adm-stat-label {
+  font-size: 9px; letter-spacing: 0.45em; text-transform: uppercase;
+  font-weight: 300; color: var(--muted); margin-top: 10px; display: block;
+}
+
+/* Action bar */
+.adm-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.adm-bar-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 300; color: var(--deep);
+}
+.adm-add-btn {
+  padding: 12px 28px; border: none;
+  font-family: 'Jost', sans-serif; font-size: 10px;
+  letter-spacing: 0.4em; text-transform: uppercase;
+  font-weight: 300; cursor: pointer; transition: all 0.3s;
+  background: linear-gradient(90deg, var(--blue), var(--teal));
+  color: var(--white);
+}
+.adm-add-btn:hover {
+  opacity: 0.85; transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(26,112,112,0.25);
+}
+
+/* Table */
+.adm-table-wrap { overflow-x: auto; }
+.adm-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--white); border: 1px solid var(--border);
+}
+.adm-table th {
+  font-size: 8px; letter-spacing: 0.5em; text-transform: uppercase;
+  font-weight: 400; color: var(--teal); padding: 14px 18px;
+  text-align: left; border-bottom: 1px solid var(--border);
+  background: #f0f5f2; white-space: nowrap;
+}
+.adm-table td {
+  padding: 15px 18px; font-size: 14px; font-weight: 300;
+  color: var(--deep); border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.adm-table tbody tr:last-child td { border-bottom: none; }
+.adm-table tbody tr:hover td { background: #f9fbfa; transition: background 0.15s; }
+
+.adm-name { font-weight: 400; }
+.adm-guests-col { text-align: center; }
+.adm-date-col { color: var(--muted); font-size: 13px; }
+
+.adm-badge {
+  font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+  font-weight: 400; padding: 5px 12px; display: inline-block;
+}
+.adm-badge.yes { background: var(--green-pale); color: var(--green); }
+.adm-badge.no  { background: #efefef; color: var(--muted); }
+
+.adm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.adm-edit-btn, .adm-del-btn {
+  font-family: 'Jost', sans-serif; font-size: 9px;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  font-weight: 300; padding: 6px 14px; border: 1px solid;
+  cursor: pointer; background: none; transition: all 0.2s; white-space: nowrap;
+}
+.adm-edit-btn { border-color: var(--teal); color: var(--teal); }
+.adm-edit-btn:hover { background: var(--teal); color: var(--white); }
+.adm-del-btn  { border-color: #c0392b; color: #c0392b; }
+.adm-del-btn:hover  { background: #c0392b; color: var(--white); }
+
+/* States */
+.adm-loading {
+  text-align: center; padding: 80px 24px;
+  font-size: 10px; letter-spacing: 0.5em; text-transform: uppercase;
+  font-weight: 300; color: var(--muted);
+}
+.adm-empty {
+  text-align: center; padding: 80px 24px;
+  background: var(--white); border: 1px solid var(--border);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-style: italic; font-weight: 300; color: var(--muted);
+}
+
+/* Overlay */
+.adm-overlay {
+  position: fixed; inset: 0; background: rgba(15,42,32,0.55);
+  z-index: 200; display: flex; align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(2px);
+}
+
+/* Add / Edit modal */
+.adm-modal {
+  background: var(--white); width: 100%; max-width: 560px;
+  max-height: 92vh; overflow-y: auto;
+  padding: 44px 40px;
+  animation: scaleIn 0.25s ease both;
+}
+.adm-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 36px;
+}
+.adm-modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 300; color: var(--deep);
+}
+.adm-modal-close {
+  width: 34px; height: 34px; border: 1px solid var(--border);
+  background: none; cursor: pointer; font-size: 20px;
+  color: var(--muted); line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.adm-modal-close:hover { border-color: var(--deep); color: var(--deep); }
+
+/* Delete confirm */
+.adm-confirm {
+  background: var(--white); width: 100%; max-width: 400px;
+  padding: 44px 40px; text-align: center;
+  animation: scaleIn 0.25s ease both;
+}
+.adm-confirm-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px; font-weight: 300; color: var(--deep); margin-bottom: 12px;
+}
+.adm-confirm-body {
+  font-size: 13px; font-weight: 300; color: var(--muted);
+  line-height: 1.8; margin-bottom: 32px;
+}
+.adm-confirm-body strong { font-weight: 400; color: var(--deep); }
+.adm-confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.adm-cancel-btn {
+  padding: 14px; border: 1px solid var(--border); background: none;
+  font-family: 'Jost', sans-serif; font-size: 9px;
+  letter-spacing: 0.4em; text-transform: uppercase;
+  font-weight: 300; color: var(--muted); cursor: pointer; transition: all 0.2s;
+}
+.adm-cancel-btn:hover:not(:disabled) { border-color: var(--deep); color: var(--deep); }
+.adm-cancel-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.adm-delete-btn {
+  padding: 14px; border: none; background: #c0392b;
+  font-family: 'Jost', sans-serif; font-size: 9px;
+  letter-spacing: 0.4em; text-transform: uppercase;
+  font-weight: 300; color: var(--white); cursor: pointer; transition: background 0.2s;
+}
+.adm-delete-btn:hover:not(:disabled) { background: #a93226; }
+.adm-delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .adm-header { padding: 14px 20px; }
+  .adm-body { padding: 32px 16px; }
+
+  .adm-stats { gap: 10px; margin-bottom: 32px; }
+  .adm-stat { padding: 22px 14px; }
+  .adm-stat-num { font-size: 40px; }
+  .adm-stat-label { font-size: 8px; letter-spacing: 0.3em; }
+
+  .adm-hide-sm { display: none; }
+
+  .adm-modal { padding: 28px 20px; max-height: 95vh; }
+  .adm-confirm { padding: 32px 24px; }
+
+  .field-row { grid-template-columns: 1fr; }
+  .attend-toggle { grid-template-columns: 1fr; }
+  .guest-entry { grid-template-columns: 1fr 1fr 32px; gap: 8px; }
+
+  .adm-table th,
+  .adm-table td { padding: 12px 14px; }
+}
+
+@media (max-width: 480px) {
+  .adm-stats { grid-template-columns: 1fr; }
+  .adm-logo { font-size: 30px; }
+  .adm-logo-sub { display: none; }
+  .guest-entry { grid-template-columns: 1fr; gap: 16px; }
+  .guest-entry .remove-guest { width: 100%; margin-bottom: 0; }
 }
