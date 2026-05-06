@@ -21,6 +21,7 @@ function formatDate(ts: unknown): string {
 export default function AdminPanel() {
   const [entries, setEntries]       = useState<RsvpEntry[]>([]);
   const [loading, setLoading]       = useState(true);
+  const [fetchError, setFetchError] = useState("");
 
   // modal
   const [modal, setModal]           = useState<"add" | "edit" | null>(null);
@@ -57,6 +58,7 @@ export default function AdminPanel() {
       },
       (err) => {
         console.error("Firestore read error:", err);
+        setFetchError(err.message);
         setLoading(false);
       }
     );
@@ -178,6 +180,10 @@ export default function AdminPanel() {
         {/* ── Table ── */}
         {loading ? (
           <div className="adm-loading">Loading…</div>
+        ) : fetchError ? (
+          <div className="adm-empty" style={{ color: "#c0392b", fontStyle: "normal", fontSize: 13 }}>
+            Firestore error: {fetchError}
+          </div>
         ) : entries.length === 0 ? (
           <div className="adm-empty">No RSVPs yet — add the first one above.</div>
         ) : (
